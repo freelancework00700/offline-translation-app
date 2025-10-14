@@ -1,0 +1,7 @@
+{
+  "name": "offline-translation-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
