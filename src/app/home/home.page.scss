@@ -1,27 +1,58 @@
-#container {
-  text-align: center;
+  .split-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    height: 100%;
+  }
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
+  .pane {
+    flex: 1;
+  }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
+  .rotated {
+    transform: rotate(180deg);
+  }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+  .translation-card {
+    border-radius: var(--radius-12);
+    padding: var(--space-12);
+  }
 
-  color: #8c8c8c;
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-12);
+    align-items: center;
+  }
 
-  margin: 0;
-}
+  .record-actions {
+    display: flex;
+    align-items: center;
+  }
 
-#container a {
-  text-decoration: none;
-}
+  ion-textarea {
+    margin-bottom: var(--space-16);
+  }
+
+  .starting-recognition-message {
+    font-size: var(--font-size-14);
+    color: var(--muted);
+    margin-top: var(--space-10);
+  }
+
+  .starting-wrapper {
+    text-align: center;
+    color: var(--muted);
+    padding: var(--space-10);
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .title-strong {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }

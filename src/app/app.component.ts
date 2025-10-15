@@ -1,11 +1,40 @@
+import {
+  IonApp,
+  IonRouterOutlet,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonTabBar,
+  IonTabButton,
+  IonIcon,
+  IonTabs,
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
+import { homeOutline, settingsOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
+  standalone: true,
+  imports: [
+    IonTabs,
+    IonApp,
+    IonRouterOutlet,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonTabBar,
+    IonTabButton,
+    IonIcon,
+    CommonModule,
+  ],
+  templateUrl: './app.component.html',
 })
 export class AppComponent {
-  constructor() {}
+  constructor() {
+    addIcons({ homeOutline, settingsOutline });
+  }
 }

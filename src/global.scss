@@ -35,3 +35,30 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Global theming */
+ion-toolbar[color="danger"] {
+  --background: var(--brand-primary);
+  --color: var(--brand-primary-contrast);
+}
+
+ion-content {
+  --background: var(--surface-alt);
+}
+
+ion-card.translation-card {
+  background: var(--surface);
+  border-radius: var(--radius-12);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+}
+
+.pill-divider {
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}

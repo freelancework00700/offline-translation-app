@@ -1,20 +1,135 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="split-container">
+    <div class="pane top rotated">
+      <ion-card class="translation-card">
+        <ion-card-header>
+          <ion-card-title class="card-title">
+            <span class="title-strong">{{ titleTopToBottom() }}</span>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="onMicClick('top')"
+              [disabled]="isStartingRecognition()"
+            >
+              <ion-icon name="volume-high"></ion-icon>
+            </ion-button>
+          </ion-card-title>
+        </ion-card-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+        <ion-card-content>
+          <ion-textarea
+            [ngModel]="inputTextTop()"
+            (ngModelChange)="onTextChange($event,'top')"
+            placeholder="Enter or speak translation..."
+            autoGrow="true"
+            [disabled]="isStartingRecognition()"
+          />
+        </ion-card-content>
+        <div class="card-actions">
+          <ion-select
+            placeholder="Select language"
+            [ngModel]="selectedTopLanguage()"
+            (ngModelChange)="onLanguageChange($event,'top')"
+            interface="popover"
+            [disabled]="isStartingRecognition()"
+          >
+            @for (lang of availableLanguages(); track lang.code) {
+            <ion-select-option [value]="lang.code"
+              >{{ lang.name }}</ion-select-option
+            >
+            }
+          </ion-select>
+
+          <div class="record-actions">
+            @if (!isRecordingTop()) {
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="startRecord('top')"
+              [disabled]="isStartingRecognition()"
+            >
+              <ion-icon name="mic"></ion-icon>
+            </ion-button>
+            }@else if(isStartingRecognition()){
+            <p class="starting-recognition-message">Starting recognition...</p>
+
+            } @else {
+            <ion-button fill="solid" color="danger" (click)="stopRecord()">
+              Stop
+            </ion-button>
+            }
+          </div>
+        </div>
+      </ion-card>
+    </div>
+
+    <div class="pane bottom">
+      <ion-card class="translation-card">
+        <ion-card-header>
+          <ion-card-title class="card-title">
+            <span class="title-strong">{{ titleBottomToTop() }}</span>
+
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="onMicClick('bottom')"
+              [disabled]="isStartingRecognition()"
+            >
+              <ion-icon name="volume-high"></ion-icon>
+            </ion-button>
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-textarea
+            [ngModel]="inputTextBottom()"
+            (ngModelChange)="onTextChange($event,'bottom')"
+            placeholder="Enter or speak translation..."
+            autoGrow="true"
+            [disabled]="isStartingRecognition()"
+          />
+        </ion-card-content>
+
+        <div class="card-actions">
+          <ion-select
+            placeholder="Select language"
+            [ngModel]="selectedBottomLanguage()"
+            (ngModelChange)="onLanguageChange($event,'bottom')"
+            interface="popover"
+            [disabled]="isStartingRecognition()"
+          >
+            @for (lang of availableLanguages(); track lang.code) {
+            <ion-select-option [value]="lang.code"
+              >{{ lang.name }}
+            </ion-select-option>
+            }
+          </ion-select>
+
+          <div class="record-actions">
+            @if (!isRecordingBottom()) {
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="startRecord('bottom')"
+              [disabled]="isStartingRecognition()"
+            >
+              <ion-icon name="mic"></ion-icon>
+            </ion-button>
+            } @else if (isStartingRecognition()) {
+            <div class="starting-wrapper">
+              <p class="starting-recognition-message">
+                Starting recognition...
+              </p>
+            </div>
+            } @else {
+            <ion-button fill="solid" color="danger" (click)="stopRecord()">
+              Stop
+            </ion-button>
+            }
+          </div>
+        </div>
+      </ion-card>
+    </div>
   </div>
 </ion-content>
