@@ -1,18 +1,14 @@
 import {
-  Translation,
-  Language as MLKitLanguage,
-} from '@capacitor-mlkit/translation';
-import {
+  IonIcon,
+  IonCard,
+  IonSelect,
   IonButton,
   IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonIcon,
   IonTextarea,
-  IonSelect,
-  IonSelectOption,
+  IonCardTitle,
+  IonCardHeader,
+  IonCardContent,
+  IonSelectOption
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +18,7 @@ import { mic, volumeHigh, copy, power } from 'ionicons/icons';
 import { Language } from 'capacitor-offline-speech-recognition';
 import { TextToSpeechService } from 'src/services/text-to-speech';
 import { Component, computed, effect, signal } from '@angular/core';
+import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
 import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-recognition';
 
 @Component({
@@ -40,8 +37,8 @@ import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-rec
     CommonModule,
     IonCardHeader,
     IonCardContent,
-    IonSelectOption,
-  ],
+    IonSelectOption
+  ]
 })
 export class HomePage {
   inputTextTop = signal('');
@@ -55,12 +52,8 @@ export class HomePage {
     const all = this.languages();
     const downloaded = this.osrService.downloadedModels();
     if (!all || all.length === 0) return [];
-    const downloadedSet = new Set(
-      downloaded.map((c) => this.normalizeLangCode(c).toLowerCase())
-    );
-    return all.filter((l) =>
-      downloadedSet.has(this.normalizeLangCode(l.code).toLowerCase())
-    );
+    const downloadedSet = new Set(downloaded.map((c) => this.normalizeLangCode(c).toLowerCase()));
+    return all.filter((l) => downloadedSet.has(this.normalizeLangCode(l.code).toLowerCase()));
   });
 
   titleTopToBottom = computed(() => {
@@ -76,15 +69,9 @@ export class HomePage {
   });
 
   isRecording = computed(() => this.osrService.isRecognizing());
-  isStartingRecognition = computed(() =>
-    this.osrService.isStartingRecognition()
-  );
-  isRecordingTop = computed(
-    () => this.isRecording() && this.activeRecordingSide() === 'top'
-  );
-  isRecordingBottom = computed(
-    () => this.isRecording() && this.activeRecordingSide() === 'bottom'
-  );
+  isStartingRecognition = computed(() => this.osrService.isStartingRecognition());
+  isRecordingTop = computed(() => this.isRecording() && this.activeRecordingSide() === 'top');
+  isRecordingBottom = computed(() => this.isRecording() && this.activeRecordingSide() === 'bottom');
   topTextSubject = new Subject<string>();
   bottomTextSubject = new Subject<string>();
 
@@ -110,7 +97,7 @@ export class HomePage {
         error: (err) => {
           console.error('Top→Bottom translation failed', err);
           this.inputTextBottom.set('');
-        },
+        }
       });
 
     this.bottomTextSubject
@@ -130,7 +117,7 @@ export class HomePage {
         error: (err) => {
           console.error('Bottom→Top translation failed', err);
           this.inputTextTop.set('');
-        },
+        }
       });
 
     effect(() => {
@@ -154,10 +141,7 @@ export class HomePage {
         this.languages.set(fetched);
 
         const available = this.availableLanguages();
-        const codes =
-          available.length > 0
-            ? available.map((l) => l.code)
-            : fetched.map((l) => l.code);
+        const codes = available.length > 0 ? available.map((l) => l.code) : fetched.map((l) => l.code);
         if (!codes.includes(this.selectedTopLanguage())) {
           this.selectedTopLanguage.set(codes[0]);
         }
@@ -183,40 +167,27 @@ export class HomePage {
 
   async translate(text: string, side: 'top' | 'bottom') {
     try {
-      const source = this.normalizeLangCode(
-        side === 'top'
-          ? this.selectedTopLanguage()
-          : this.selectedBottomLanguage()
-      );
-      const target = this.normalizeLangCode(
-        side === 'top'
-          ? this.selectedBottomLanguage()
-          : this.selectedTopLanguage()
-      );
+      const source = this.normalizeLangCode(side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage());
+      const target = this.normalizeLangCode(side === 'top' ? this.selectedBottomLanguage() : this.selectedTopLanguage());
 
       // Perform translation
       const result = await Translation.translate({
         text,
         sourceLanguage: source as MLKitLanguage,
-        targetLanguage: target as MLKitLanguage,
+        targetLanguage: target as MLKitLanguage
       });
 
       // Return the translated text
       return result.text;
     } catch (error) {
       console.error('Translation error:', error);
-      throw new Error(
-        'An error occurred while translating. Please try again later.'
-      );
+      throw new Error('An error occurred while translating. Please try again later.');
     }
   }
 
   onMicClick(side: 'top' | 'bottom') {
     const text = side === 'top' ? this.inputTextTop() : this.inputTextBottom();
-    const lang =
-      side === 'top'
-        ? this.selectedTopLanguage()
-        : this.selectedBottomLanguage();
+    const lang = side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage();
     if (text.trim()) {
       this.ttsService.speakText(text, lang);
     }
@@ -224,10 +195,7 @@ export class HomePage {
 
   async onRecord(side: 'top' | 'bottom') {
     this.activeRecordingSide.set(side);
-    const lang =
-      side === 'top'
-        ? this.selectedTopLanguage()
-        : this.selectedBottomLanguage();
+    const lang = side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage();
     await this.osrService.startRecognition(lang);
   }
 
@@ -248,33 +216,25 @@ export class HomePage {
       this.selectedTopLanguage.set(code);
       const text = this.inputTextTop();
       if (text.trim()) {
-        this.translateInPlace(text, previous, code).then((translated) =>
-          this.inputTextTop.set(translated)
-        );
+        this.translateInPlace(text, previous, code).then((translated) => this.inputTextTop.set(translated));
       }
     } else if (side === 'bottom') {
       const previous = this.selectedBottomLanguage();
       this.selectedBottomLanguage.set(code);
       const text = this.inputTextBottom();
       if (text.trim()) {
-        this.translateInPlace(text, previous, code).then((translated) =>
-          this.inputTextBottom.set(translated)
-        );
+        this.translateInPlace(text, previous, code).then((translated) => this.inputTextBottom.set(translated));
       }
     }
   }
 
-  async translateInPlace(
-    text: string,
-    fromCode: string,
-    toCode: string
-  ): Promise<string> {
+  async translateInPlace(text: string, fromCode: string, toCode: string): Promise<string> {
     const source = this.normalizeLangCode(fromCode) as MLKitLanguage;
     const target = this.normalizeLangCode(toCode) as MLKitLanguage;
     const result = await Translation.translate({
       text,
       sourceLanguage: source,
-      targetLanguage: target,
+      targetLanguage: target
     });
     return result.text;
   }
@@ -285,11 +245,7 @@ export class HomePage {
   }
 
   getLanguageName(code: string): string {
-    const found = this.languages().find(
-      (l) =>
-        this.normalizeLangCode(l.code).toLowerCase() ===
-        this.normalizeLangCode(code).toLowerCase()
-    );
+    const found = this.languages().find((l) => this.normalizeLangCode(l.code).toLowerCase() === this.normalizeLangCode(code).toLowerCase());
     return found ? found.name : code;
   }
 }

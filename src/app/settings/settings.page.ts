@@ -1,32 +1,15 @@
-import {
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
-  IonIcon,
-  IonSpinner,
-} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { Language } from 'capacitor-offline-speech-recognition';
 import { checkmarkCircle, cloudDownloadOutline } from 'ionicons/icons';
 import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-recognition';
+import { IonIcon, IonList, IonItem, IonLabel, IonButton, IonSpinner, IonContent } from '@ionic/angular/standalone';
 @Component({
   selector: 'app-settings',
-  templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
-  imports: [
-    IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButton,
-    IonIcon,
-    CommonModule,
-    IonSpinner,
-  ],
+  templateUrl: './settings.page.html',
+  imports: [IonIcon, IonItem, IonList, IonLabel, IonButton, IonSpinner, IonContent, CommonModule]
 })
 export class SettingsPage implements OnInit {
   isDownloading = signal<boolean>(false);
@@ -60,10 +43,7 @@ export class SettingsPage implements OnInit {
     try {
       await this.speechService.downloadLanguageModel(lang.code);
     } catch (error) {
-      console.error(
-        `Error downloading language model for ${lang.code}:`,
-        error
-      );
+      console.error(`Error downloading language model for ${lang.code}:`, error);
     } finally {
       this.isDownloading.set(false);
     }

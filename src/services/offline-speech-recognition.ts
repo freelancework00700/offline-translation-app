@@ -1,18 +1,10 @@
-import {
-  Translation,
-  Language as MLKitLanguage,
-} from '@capacitor-mlkit/translation';
 import { Router } from '@angular/router';
-import {
-  DownloadProgress,
-  Language,
-  OfflineSpeechRecognition,
-  RecognitionResult,
-} from 'capacitor-offline-speech-recognition';
 import { Injectable, signal } from '@angular/core';
+import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
+import { DownloadProgress, Language, OfflineSpeechRecognition, RecognitionResult } from 'capacitor-offline-speech-recognition';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class OfflineSpeechRecognitionService {
   languages = signal<Language[]>([]);
@@ -28,16 +20,13 @@ export class OfflineSpeechRecognitionService {
 
   async getSupportedLanguages() {
     try {
-      const response: any =
-        await OfflineSpeechRecognition.getSupportedLanguages();
-      const pluginLanguages = Array.isArray(response)
-        ? response
-        : response.languages;
+      const response: any = await OfflineSpeechRecognition.getSupportedLanguages();
+      const pluginLanguages = Array.isArray(response) ? response : response.languages;
 
       const langs: Language[] = pluginLanguages.map((lang: any) => ({
         code: lang.code,
         name: lang.name,
-        modelName: lang.modelName || `model-${lang.code}`,
+        modelName: lang.modelName || `model-${lang.code}`
       }));
 
       this.languages.set(langs);
@@ -48,11 +37,8 @@ export class OfflineSpeechRecognitionService {
 
   async getDownloadedLanguageModels() {
     try {
-      const response =
-        await OfflineSpeechRecognition.getDownloadedLanguageModels();
-      const models = (response.models || []).map(
-        (m: any) => m.language || m.code
-      );
+      const response = await OfflineSpeechRecognition.getDownloadedLanguageModels();
+      const models = (response.models || []).map((m: any) => m.language || m.code);
       this.downloadedModels.set(models);
       console.log('Downloaded models:', models);
       if (!models || models.length === 0) {
@@ -69,18 +55,15 @@ export class OfflineSpeechRecognitionService {
     try {
       this.downloadProgress.update((p) => ({ ...p, [language]: 0 }));
 
-      this.downloadListener = await OfflineSpeechRecognition.addListener(
-        'downloadProgress',
-        (progress: DownloadProgress) => {
-          this.downloadProgress.update((p) => ({
-            ...p,
-            [language]: progress.progress,
-          }));
-        }
-      );
+      this.downloadListener = await OfflineSpeechRecognition.addListener('downloadProgress', (progress: DownloadProgress) => {
+        this.downloadProgress.update((p) => ({
+          ...p,
+          [language]: progress.progress
+        }));
+      });
 
       const result = await OfflineSpeechRecognition.downloadLanguageModel({
-        language,
+        language
       });
 
       if (this.downloadListener) {
@@ -98,10 +81,7 @@ export class OfflineSpeechRecognitionService {
       try {
         await this.downloadMLKitModel(language as any);
       } catch (mlkitError) {
-        console.error(
-          `Error downloading MLKit model (${language}):`,
-          mlkitError
-        );
+        console.error(`Error downloading MLKit model (${language}):`, mlkitError);
       }
     } catch (error) {
       console.error(`Error downloading language model (${language}):`, error);
@@ -116,7 +96,7 @@ export class OfflineSpeechRecognitionService {
     try {
       const languageCode = language === 'en-us' ? 'en' : language;
       await Translation.downloadModel({
-        language: languageCode as MLKitLanguage,
+        language: languageCode as MLKitLanguage
       });
     } catch (error) {
       console.error(`Error downloading MLKit model (${language}):`, error);
@@ -127,30 +107,25 @@ export class OfflineSpeechRecognitionService {
     try {
       this.isStartingRecognition.set(true);
       if (this.isRecognizing()) {
-        console.warn(
-          'Recognition is already in progress. Stopping and restarting...'
-        );
-        await this.stopRecognition(); 
+        console.warn('Recognition is already in progress. Stopping and restarting...');
+        await this.stopRecognition();
       }
 
       this.recognizedText.set('');
       this.isRecognizing.set(true);
 
-      this.recognitionListener = await OfflineSpeechRecognition.addListener(
-        'recognitionResult',
-        (result: RecognitionResult) => {
-          console.log(`Recognized: ${result.text} (Final: ${result.isFinal})`);
+      this.recognitionListener = await OfflineSpeechRecognition.addListener('recognitionResult', (result: RecognitionResult) => {
+        console.log(`Recognized: ${result.text} (Final: ${result.isFinal})`);
 
-          this.recognizedText.update((prev) => {
-            if (result.isFinal) {
-              return prev ? `${prev} ${result.text}` : result.text;
-            } else {
-              // For intermediate updates (optional behavior)
-              return `${prev}\n${result.text}`.trim();
-            }
-          });
-        }
-      );
+        this.recognizedText.update((prev) => {
+          if (result.isFinal) {
+            return result.text;
+          } else {
+            // For intermediate updates (optional behavior)
+            return `${prev}\n${result.text}`.trim();
+          }
+        });
+      });
 
       await OfflineSpeechRecognition.startRecognition({ language });
       this.isStartingRecognition.set(false);

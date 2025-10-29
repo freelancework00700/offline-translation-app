@@ -6,58 +6,43 @@
           <ion-card-title class="card-title">
             <span class="title-strong">{{ titleTopToBottom() }}</span>
 
-            <ion-button
-              fill="clear"
-              color="danger"
-              (click)="onMicClick('top')"
-              [disabled]="isStartingRecognition()"
-            >
-              <ion-icon name="volume-high"></ion-icon>
+            <ion-button fill="clear" color="danger" (click)="onMicClick('top')" [disabled]="isStartingRecognition()">
+              <ion-icon name="volume-high" />
             </ion-button>
           </ion-card-title>
         </ion-card-header>
 
         <ion-card-content>
           <ion-textarea
-            [ngModel]="inputTextTop()"
-            (ngModelChange)="onTextChange($event,'top')"
-            placeholder="Enter or speak translation..."
             autoGrow="true"
+            [ngModel]="inputTextTop()"
             [disabled]="isStartingRecognition()"
+            placeholder="Enter or speak translation..."
+            (ngModelChange)="onTextChange($event, 'top')"
           />
         </ion-card-content>
         <div class="card-actions">
           <ion-select
+            interface="popover"
             placeholder="Select language"
             [ngModel]="selectedTopLanguage()"
-            (ngModelChange)="onLanguageChange($event,'top')"
-            interface="popover"
             [disabled]="isStartingRecognition()"
+            (ngModelChange)="onLanguageChange($event, 'top')"
           >
             @for (lang of availableLanguages(); track lang.code) {
-            <ion-select-option [value]="lang.code"
-              >{{ lang.name }}</ion-select-option
-            >
+              <ion-select-option [value]="lang.code">{{ lang.name }}</ion-select-option>
             }
           </ion-select>
 
           <div class="record-actions">
             @if (!isRecordingTop()) {
-            <ion-button
-              fill="clear"
-              color="danger"
-              (click)="startRecord('top')"
-              [disabled]="isStartingRecognition()"
-            >
-              <ion-icon name="mic"></ion-icon>
-            </ion-button>
-            }@else if(isStartingRecognition()){
-            <p class="starting-recognition-message">Starting recognition...</p>
-
+              <ion-button fill="clear" color="danger" (click)="startRecord('top')" [disabled]="isStartingRecognition()">
+                <ion-icon name="mic" />
+              </ion-button>
+            } @else if (isStartingRecognition()) {
+              <p class="starting-recognition-message">Starting recognition...</p>
             } @else {
-            <ion-button fill="solid" color="danger" (click)="stopRecord()">
-              Stop
-            </ion-button>
+              <ion-button fill="solid" color="danger" (click)="stopRecord()"> Stop </ion-button>
             }
           </div>
         </div>
@@ -70,62 +55,46 @@
           <ion-card-title class="card-title">
             <span class="title-strong">{{ titleBottomToTop() }}</span>
 
-            <ion-button
-              fill="clear"
-              color="danger"
-              (click)="onMicClick('bottom')"
-              [disabled]="isStartingRecognition()"
-            >
-              <ion-icon name="volume-high"></ion-icon>
+            <ion-button fill="clear" color="danger" (click)="onMicClick('bottom')" [disabled]="isStartingRecognition()">
+              <ion-icon name="volume-high" />
             </ion-button>
           </ion-card-title>
         </ion-card-header>
 
         <ion-card-content>
           <ion-textarea
-            [ngModel]="inputTextBottom()"
-            (ngModelChange)="onTextChange($event,'bottom')"
-            placeholder="Enter or speak translation..."
             autoGrow="true"
+            [ngModel]="inputTextBottom()"
             [disabled]="isStartingRecognition()"
+            placeholder="Enter or speak translation..."
+            (ngModelChange)="onTextChange($event, 'bottom')"
           />
         </ion-card-content>
 
         <div class="card-actions">
           <ion-select
+            interface="popover"
             placeholder="Select language"
             [ngModel]="selectedBottomLanguage()"
-            (ngModelChange)="onLanguageChange($event,'bottom')"
-            interface="popover"
             [disabled]="isStartingRecognition()"
+            (ngModelChange)="onLanguageChange($event, 'bottom')"
           >
             @for (lang of availableLanguages(); track lang.code) {
-            <ion-select-option [value]="lang.code"
-              >{{ lang.name }}
-            </ion-select-option>
+              <ion-select-option [value]="lang.code">{{ lang.name }} </ion-select-option>
             }
           </ion-select>
 
           <div class="record-actions">
             @if (!isRecordingBottom()) {
-            <ion-button
-              fill="clear"
-              color="danger"
-              (click)="startRecord('bottom')"
-              [disabled]="isStartingRecognition()"
-            >
-              <ion-icon name="mic"></ion-icon>
-            </ion-button>
+              <ion-button fill="clear" color="danger" (click)="startRecord('bottom')" [disabled]="isStartingRecognition()">
+                <ion-icon name="mic" />
+              </ion-button>
             } @else if (isStartingRecognition()) {
-            <div class="starting-wrapper">
-              <p class="starting-recognition-message">
-                Starting recognition...
-              </p>
-            </div>
+              <div class="starting-wrapper">
+                <p class="starting-recognition-message">Starting recognition...</p>
+              </div>
             } @else {
-            <ion-button fill="solid" color="danger" (click)="stopRecord()">
-              Stop
-            </ion-button>
+              <ion-button fill="solid" color="danger" (click)="stopRecord()"> Stop </ion-button>
             }
           </div>
         </div>
