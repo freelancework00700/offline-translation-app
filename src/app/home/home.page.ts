@@ -1,8 +1,11 @@
 import {
   IonIcon,
   IonCard,
+  IonTitle,
+  IonHeader,
   IonSelect,
   IonButton,
+  IonToolbar,
   IonContent,
   IonTextarea,
   IonCardTitle,
@@ -10,11 +13,8 @@ import {
   IonCardContent,
   IonSelectOption
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
-import { mic, volumeHigh, copy, power } from 'ionicons/icons';
 import { Language } from 'capacitor-offline-speech-recognition';
 import { TextToSpeechService } from 'src/services/text-to-speech';
 import { Component, computed, effect, signal } from '@angular/core';
@@ -28,13 +28,15 @@ import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-rec
   imports: [
     IonIcon,
     IonCard,
+    IonTitle,
+    IonHeader,
     IonButton,
     IonSelect,
+    IonToolbar,
     IonContent,
     IonTextarea,
     FormsModule,
     IonCardTitle,
-    CommonModule,
     IonCardHeader,
     IonCardContent,
     IonSelectOption
@@ -79,7 +81,6 @@ export class HomePage {
     private ttsService: TextToSpeechService,
     private osrService: OfflineSpeechRecognitionService
   ) {
-    addIcons({ mic, volumeHigh, copy, power });
     this.topTextSubject
       .pipe(
         debounceTime(300),

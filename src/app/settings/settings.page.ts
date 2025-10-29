@@ -1,24 +1,20 @@
-import { addIcons } from 'ionicons';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { Language } from 'capacitor-offline-speech-recognition';
-import { checkmarkCircle, cloudDownloadOutline } from 'ionicons/icons';
 import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-recognition';
-import { IonIcon, IonList, IonItem, IonLabel, IonButton, IonSpinner, IonContent } from '@ionic/angular/standalone';
+import { IonIcon, IonList, IonItem, IonLabel, IonButton, IonSpinner, IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 @Component({
   selector: 'app-settings',
   styleUrls: ['./settings.page.scss'],
   templateUrl: './settings.page.html',
-  imports: [IonIcon, IonItem, IonList, IonLabel, IonButton, IonSpinner, IonContent, CommonModule]
+  imports: [IonIcon, IonItem, IonList, IonLabel, IonButton, IonSpinner, IonContent, DecimalPipe, IonHeader, IonToolbar, IonTitle]
 })
 export class SettingsPage implements OnInit {
   isDownloading = signal<boolean>(false);
   languages = this.speechService.languages;
   downloadedModels = this.speechService.downloadedModels;
   downloadProgress = this.speechService.downloadProgress;
-  constructor(private speechService: OfflineSpeechRecognitionService) {
-    addIcons({ checkmarkCircle, cloudDownloadOutline });
-  }
+  constructor(private speechService: OfflineSpeechRecognitionService) {}
 
   async ngOnInit() {
     await this.loadLanguages();
