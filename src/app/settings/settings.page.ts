@@ -14,6 +14,7 @@ export class SettingsPage implements OnInit {
   languages = this.speechService.languages;
   downloadedModels = this.speechService.downloadedModels;
   downloadProgress = this.speechService.downloadProgress;
+  mlkitDownloading = this.speechService.mlkitDownloading;
   constructor(private speechService: OfflineSpeechRecognitionService) {}
 
   async ngOnInit() {

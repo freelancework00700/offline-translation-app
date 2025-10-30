@@ -15,6 +15,7 @@ export class OfflineSpeechRecognitionService {
   isStartingRecognition = signal<boolean>(false);
   recognitionListener?: { remove: () => void };
   downloadProgress = signal<Record<string, number>>({});
+  mlkitDownloading = signal<{ [key: string]: boolean }>({});
 
   constructor(private router: Router) {}
 
@@ -54,6 +55,7 @@ export class OfflineSpeechRecognitionService {
   async downloadLanguageModel(language: string) {
     try {
       this.downloadProgress.update((p) => ({ ...p, [language]: 0 }));
+      this.mlkitDownloading.update((p) => ({ ...p, [language]: true }));
 
       this.downloadListener = await OfflineSpeechRecognition.addListener('downloadProgress', (progress: DownloadProgress) => {
         this.downloadProgress.update((p) => ({
@@ -80,6 +82,10 @@ export class OfflineSpeechRecognitionService {
 
       try {
         await this.downloadMLKitModel(language as any);
+        this.mlkitDownloading.update((p) => {
+          const { [language]: _, ...rest } = p;
+          return rest;
+        });
       } catch (mlkitError) {
         console.error(`Error downloading MLKit model (${language}):`, mlkitError);
       }
@@ -114,19 +120,22 @@ export class OfflineSpeechRecognitionService {
       this.recognizedText.set('');
       this.isRecognizing.set(true);
 
+      let permanentText = '';
+      let tempText = '';
+
       this.recognitionListener = await OfflineSpeechRecognition.addListener('recognitionResult', (result: RecognitionResult) => {
         console.log(`Recognized: ${result.text} (Final: ${result.isFinal})`);
 
-        this.recognizedText.update((prev) => {
-          if (result.isFinal) {
-            return result.text;
-          } else {
-            // For intermediate updates (optional behavior)
-            return `${prev}\n${result.text}`.trim();
-          }
-        });
-      });
+        if (result.isFinal) {
+          permanentText = permanentText ? `${permanentText.trim()} ${result.text.trim()}` : result.text.trim();
+          tempText = '';
 
+          this.recognizedText.set(permanentText.trim());
+        } else {
+          tempText = result.text.trim();
+          this.recognizedText.set(`${permanentText.trim()} ${tempText}`.trim());
+        }
+      });
       await OfflineSpeechRecognition.startRecognition({ language });
       this.isStartingRecognition.set(false);
       console.log(`Started speech recognition for language: ${language}`);
