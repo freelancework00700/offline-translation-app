@@ -13,7 +13,7 @@ PODS:
   - CapacitorMlkitTranslation (7.3.0):
     - Capacitor
     - GoogleMLKit/Translate (= 7.0.0)
-  - CapacitorOfflineSpeechRecognition (1.0.1):
+  - CapacitorOfflineSpeechRecognition (2.1.0):
     - Capacitor
     - SSZipArchive
   - CapacitorStatusBar (7.0.3):
@@ -113,15 +113,15 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
-  CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
-  CapacitorCommunityTextToSpeech: 4e82235c0e184d2edbd1b2d81ef22af531bda13e
+  Capacitor: 09d9ff8e9618e8c4b3cab2bbee34a17215dd2fef
+  CapacitorApp: 846d4b4a1dbb19dd1e9029c08ba6f028aa7be862
+  CapacitorCommunityTextToSpeech: 2564247444f4797a8ac9d322418e049c9b08a978
   CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
-  CapacitorHaptics: b3fb2869e72c4466e18ce9ccbeb60a3d8723b3d4
-  CapacitorKeyboard: 62f36104f26d53d8b3a2a43f2a69fe714f1777d5
-  CapacitorMlkitTranslation: 85c510faa466d8ead448de9e0c8eb44d5aca7bff
-  CapacitorOfflineSpeechRecognition: 691a081232dd2cda7227dd29023e0020dc733690
-  CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
+  CapacitorHaptics: 09d96bcb5a2b74ede8fd039b4cdf58fc43dcacf1
+  CapacitorKeyboard: 3822c3a0c6b58168f96ca562f9534ed095d40860
+  CapacitorMlkitTranslation: 134c853b803a172884c2ab71d1c2db5710a96f06
+  CapacitorOfflineSpeechRecognition: 80bfb25f94a0575b156541a402aae67c3b285a6b
+  CapacitorStatusBar: 7d8fcbd6768db014bd721d75e246590b014928e8
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMLKit: eff9e23ec1d90ea4157a1ee2e32a4f610c5b3318
   GoogleToolboxForMac: d1a2cbf009c453f4d6ded37c105e2f67a32206d8

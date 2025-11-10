@@ -10,7 +10,7 @@
       <ion-card class="translation-card">
         <ion-card-header>
           <ion-card-title class="card-title">
-            <span class="title-strong">{{ titleTopToBottom() }}</span>
+            <span class="title-strong">{{ titleTopToBottom() || rawTitleTopToBottom() }}</span>
 
             <ion-button fill="clear" color="danger" (click)="onMicClick('top')" [disabled]="isStartingRecognition()">
               <ion-icon name="volume-high" />
@@ -59,7 +59,7 @@
       <ion-card class="translation-card">
         <ion-card-header>
           <ion-card-title class="card-title">
-            <span class="title-strong">{{ titleBottomToTop() }}</span>
+            <span class="title-strong">{{ titleBottomToTop() || rawTitleBottomToTop() }}</span>
 
             <ion-button fill="clear" color="danger" (click)="onMicClick('bottom')" [disabled]="isStartingRecognition()">
               <ion-icon name="volume-high" />

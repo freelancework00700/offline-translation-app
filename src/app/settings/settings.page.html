@@ -17,8 +17,8 @@
           <ion-icon name="checkmark-circle" color="success" slot="end" class="download-progress" />
         }
 
-        <!-- if language model is downloading -->
-        @if (downloadProgress()[lang.code] || mlkitDownloading()[lang.code]) {
+        <!--  Downloading -->
+        @if (isDownloadingMap()[lang.code] || mlkitDownloading()[lang.code] || downloadProgress()[lang.code]) {
           <div class="download-progress">
             <ion-spinner name="lines-sharp" class="black-spinner"></ion-spinner>
             @if (downloadProgress()[lang.code]) {
@@ -27,10 +27,10 @@
           </div>
         }
 
-        <!-- if language model is not downloaded and no progress -->
-        @if (!isDownloaded(lang.code) && !downloadProgress()[lang.code] && !mlkitDownloading()[lang.code]) {
-          <ion-button color="primary" size="small" fill="clear" (click)="downloadModel(lang)" [disabled]="isDownloading()" slot="end">
-            <ion-icon name="cloud-download-outline" />
+        <!--  Not Downloaded -->
+        @if (!isDownloaded(lang.code) && !isDownloadingMap()[lang.code] && !mlkitDownloading()[lang.code]) {
+          <ion-button color="primary" size="small" fill="clear" (click)="downloadModel(lang)" [disabled]="anyDownloading()" slot="end">
+            <ion-icon name="cloud-download-outline"></ion-icon>
           </ion-button>
         }
       </ion-item>

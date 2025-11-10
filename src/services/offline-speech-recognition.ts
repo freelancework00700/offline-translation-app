@@ -2,6 +2,7 @@ import { Router } from '@angular/router';
 import { Injectable, signal } from '@angular/core';
 import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
 import { DownloadProgress, Language, OfflineSpeechRecognition, RecognitionResult } from 'capacitor-offline-speech-recognition';
+import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root'
@@ -57,6 +58,13 @@ export class OfflineSpeechRecognitionService {
       this.downloadProgress.update((p) => ({ ...p, [language]: 0 }));
       this.mlkitDownloading.update((p) => ({ ...p, [language]: true }));
 
+      //  Clean old listener if exists
+      if (this.downloadListener) {
+        await this.downloadListener.remove();
+        this.downloadListener = undefined;
+      }
+
+      //  Progress listener
       this.downloadListener = await OfflineSpeechRecognition.addListener('downloadProgress', (progress: DownloadProgress) => {
         this.downloadProgress.update((p) => ({
           ...p,
@@ -64,43 +72,37 @@ export class OfflineSpeechRecognitionService {
         }));
       });
 
-      const result = await OfflineSpeechRecognition.downloadLanguageModel({
-        language
-      });
+      //  Run both model downloads in parallel
+      await Promise.all([OfflineSpeechRecognition.downloadLanguageModel({ language }), this.downloadMLKitModel(language)]);
 
+      //  After completion
+      await this.getDownloadedLanguageModels();
+    } catch (error) {
+      console.error(`Error downloading ${language}:`, error);
+      throw error;
+    } finally {
+      //  Always cleanup
+      this.downloadProgress.update((p) => {
+        const { [language]: _, ...rest } = p;
+        return rest;
+      });
+      this.mlkitDownloading.update((p) => {
+        const { [language]: _, ...rest } = p;
+        return rest;
+      });
       if (this.downloadListener) {
         await this.downloadListener.remove();
         this.downloadListener = undefined;
       }
-
-      await this.getDownloadedLanguageModels();
-
-      this.downloadProgress.update((p) => {
-        const { [language]: _, ...rest } = p;
-        return rest;
-      });
-
-      try {
-        await this.downloadMLKitModel(language as any);
-        this.mlkitDownloading.update((p) => {
-          const { [language]: _, ...rest } = p;
-          return rest;
-        });
-      } catch (mlkitError) {
-        console.error(`Error downloading MLKit model (${language}):`, mlkitError);
-      }
-    } catch (error) {
-      console.error(`Error downloading language model (${language}):`, error);
-      this.downloadProgress.update((p) => {
-        const { [language]: _, ...rest } = p;
-        return rest;
-      });
     }
   }
 
   async downloadMLKitModel(language: string) {
     try {
       const languageCode = language === 'en-us' ? 'en' : language;
+      if (languageCode === 'en' && Capacitor.getPlatform() === 'ios') {
+        return;
+      }
       await Translation.downloadModel({
         language: languageCode as MLKitLanguage
       });
@@ -113,7 +115,6 @@ export class OfflineSpeechRecognitionService {
     try {
       this.isStartingRecognition.set(true);
       if (this.isRecognizing()) {
-        console.warn('Recognition is already in progress. Stopping and restarting...');
         await this.stopRecognition();
       }
 
@@ -124,8 +125,6 @@ export class OfflineSpeechRecognitionService {
       let tempText = '';
 
       this.recognitionListener = await OfflineSpeechRecognition.addListener('recognitionResult', (result: RecognitionResult) => {
-        console.log(`Recognized: ${result.text} (Final: ${result.isFinal})`);
-
         if (result.isFinal) {
           permanentText = permanentText ? `${permanentText.trim()} ${result.text.trim()}` : result.text.trim();
           tempText = '';

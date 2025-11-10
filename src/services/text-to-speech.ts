@@ -5,7 +5,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 export class TextToSpeechService {
   async speakText(text: string, lang: string) {
     try {
-      await TextToSpeech.speak({ text, lang });
+      await TextToSpeech.speak({ text, lang, category: 'playback' });
     } catch (err) {
       console.error('Text-to-speech error', err);
     }

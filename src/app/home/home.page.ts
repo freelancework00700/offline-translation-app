@@ -58,17 +58,20 @@ export class HomePage {
     return all.filter((l) => downloadedSet.has(this.normalizeLangCode(l.code).toLowerCase()));
   });
 
-  titleTopToBottom = computed(() => {
+  rawTitleTopToBottom = computed(() => {
     const src = this.getLanguageName(this.selectedTopLanguage());
     const dst = this.getLanguageName(this.selectedBottomLanguage());
     return `${src} to ${dst}`;
   });
 
-  titleBottomToTop = computed(() => {
+  rawTitleBottomToTop = computed(() => {
     const src = this.getLanguageName(this.selectedBottomLanguage());
     const dst = this.getLanguageName(this.selectedTopLanguage());
     return `${src} to ${dst}`;
   });
+
+  titleTopToBottom = signal('');
+  titleBottomToTop = signal('');
 
   isRecording = computed(() => this.osrService.isRecognizing());
   isStartingRecognition = computed(() => this.osrService.isStartingRecognition());
@@ -122,6 +125,21 @@ export class HomePage {
       });
 
     effect(() => {
+      const topLang = this.selectedTopLanguage();
+      const bottomLang = this.selectedBottomLanguage();
+
+      if (!topLang || !bottomLang) return;
+
+      // Recompute raw titles
+      const rawTopToBottom = this.rawTitleTopToBottom();
+      const rawBottomToTop = this.rawTitleBottomToTop();
+      this.titleTopToBottom.set(rawTopToBottom);
+      this.titleBottomToTop.set(rawBottomToTop);
+
+      this.updateTranslatedTitles(rawTopToBottom, rawBottomToTop, topLang, bottomLang);
+    });
+
+    effect(() => {
       const active = this.activeRecordingSide();
       const text = this.osrService.recognizedText();
       const isRecognizing = this.osrService.isRecognizing();
@@ -131,6 +149,38 @@ export class HomePage {
 
       this.onTextChange(text, active);
     });
+  }
+
+  async updateTranslatedTitles(rawTopToBottom: string, rawBottomToTop: string, topLang: string, bottomLang: string) {
+    try {
+      const topCode = this.normalizeLangCode(topLang);
+      const bottomCode = this.normalizeLangCode(bottomLang);
+
+      const [t1, t2] = await Promise.all([this.translateText(rawTopToBottom, topCode), this.translateText(rawBottomToTop, bottomCode)]);
+      
+      this.titleTopToBottom.set(t1);
+      this.titleBottomToTop.set(t2);
+    } catch (err) {
+      console.error('Title translation error:', err);
+      this.titleTopToBottom.set(rawTopToBottom);
+      this.titleBottomToTop.set(rawBottomToTop);
+    }
+  }
+
+  async translateText(text: string, targetLang: string): Promise<string> {
+    try {
+      const normalizedTarget = this.normalizeLangCode(targetLang);
+      
+      const result = await Translation.translate({
+        text,
+        sourceLanguage: 'en' as MLKitLanguage,
+        targetLanguage: normalizedTarget as MLKitLanguage
+      });
+      return result.text;
+    } catch (error) {
+      console.error('Translation failed:', error);
+      return text;
+    }
   }
 
   async ngOnInit() {
