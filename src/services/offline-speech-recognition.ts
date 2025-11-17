@@ -189,29 +189,26 @@ export class OfflineSpeechRecognitionService {
     if (!fetched || fetched.length === 0) return;
 
     const available = this.availableLanguages();
-    const codes = available.length > 0 ? available.map((l) => l.code) : fetched.map((l) => l.code);
+    const availableCodes = available.length > 0 ? available.map((l) => l.code) : fetched.map((l) => l.code);
 
-    // Load stored values
     const storedFirst = JSON.parse(localStorage.getItem('firstLanguage') || 'null');
     const storedSecond = JSON.parse(localStorage.getItem('secondLanguage') || 'null');
 
-    // If stored preferences exist → load them
-    if (storedFirst?.code && storedSecond?.code) {
-      this.firstLanguage.set(storedFirst);
-      this.secondLanguage.set(storedSecond);
+    const firstValid = storedFirst && availableCodes.includes(storedFirst.code) ? storedFirst : null;
+    const secondValid = storedSecond && availableCodes.includes(storedSecond.code) ? storedSecond : null;
+
+    if (firstValid && secondValid) {
+      this.firstLanguage.set(firstValid);
+      this.secondLanguage.set(secondValid);
       return;
     }
 
-    // Auto-select defaults
-    const first = available.find((l) => l.code === codes[0]);
-    let second = available.find((l) => l.code === codes[1]);
-
-    if (!second) second = first;
+    const first = available.find((l) => l.code === firstValid?.code) ?? available[0];
+    let second = available.find((l) => l.code === secondValid?.code) ?? available[1] ?? first;
 
     const firstObj = { code: first?.code ?? '', name: first?.name ?? '' };
     const secondObj = { code: second?.code ?? '', name: second?.name ?? '' };
 
-    // Save individually
     localStorage.setItem('firstLanguage', JSON.stringify(firstObj));
     localStorage.setItem('secondLanguage', JSON.stringify(secondObj));
 
@@ -221,8 +218,11 @@ export class OfflineSpeechRecognitionService {
 
   async deleteLanguage(code: string) {
     try {
+      await OfflineSpeechRecognition.deleteLanguageModel({ language: code });
       const languageCode = code === 'en-us' ? 'en' : code;
       await Translation.deleteDownloadedModel({ language: languageCode as MLKitLanguage });
+      await this.getDownloadedLanguageModels();
+      await this.loadPreferences();
     } catch (error) {
       console.error('Error deleting language', code, error);
     }

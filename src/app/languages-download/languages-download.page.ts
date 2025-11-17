@@ -62,7 +62,7 @@ export class LanguagesDownloadPage implements OnInit {
   constructor(
     private alertController: AlertController,
     private speechService: OfflineSpeechRecognitionService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadLanguages();
@@ -85,7 +85,6 @@ export class LanguagesDownloadPage implements OnInit {
     const code = lang.code;
     if (this.isDownloaded(code)) return;
 
-    //  prevent double clicks or parallel downloads
     if (this.isDownloadingMap()[code] || this.mlkitDownloading()[code] || this.anyDownloading()) return;
 
     this.isDownloadingMap.update((m) => ({ ...m, [code]: true }));
@@ -96,7 +95,6 @@ export class LanguagesDownloadPage implements OnInit {
     } catch (error) {
       console.error(`Error downloading ${code}:`, error);
     } finally {
-      //  cleanup per-language state
       this.isDownloadingMap.update((m) => {
         const { [code]: _, ...rest } = m;
         return rest;
@@ -110,7 +108,6 @@ export class LanguagesDownloadPage implements OnInit {
         return rest;
       });
 
-      //  if no more downloads left, clear global flag
       const stillDownloading = Object.keys(this.isDownloadingMap()).length > 0;
       this.isDownloading.set(stillDownloading);
     }
@@ -137,7 +134,22 @@ export class LanguagesDownloadPage implements OnInit {
     await alert.present();
   }
 
-  deleteLanguage(code: string) {
-    this.speechService.deleteLanguage(code);
+  async deleteLanguage(code: string) {
+    this.isDownloadingMap.update((m) => ({ ...m, [code]: true }));
+    this.isDownloading.set(true);
+
+    try {
+      await this.speechService.deleteLanguage(code);
+    } catch (error) {
+      console.error(`Error deleting ${code}:`, error);
+    } finally {
+      this.isDownloadingMap.update((m) => {
+        const { [code]: _, ...rest } = m;
+        return rest;
+      });
+
+      const stillDownloading = Object.keys(this.isDownloadingMap()).length > 0;
+      this.isDownloading.set(stillDownloading);
+    }
   }
 }

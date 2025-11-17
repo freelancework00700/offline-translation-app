@@ -21,7 +21,7 @@
 
         <!-- if language model is downloaded -->
         @if (isDownloaded(lang.code) && !mlkitDownloading()[lang.code]) {
-          <ion-button color="primary" size="small" fill="clear" (click)="confirmDelete(lang)" slot="end">
+          <ion-button color="primary" size="small" fill="clear" (click)="confirmDelete(lang)" slot="end" [disabled]="anyDownloading()">
             <ion-icon name="trash-outline" />
           </ion-button>
         }
