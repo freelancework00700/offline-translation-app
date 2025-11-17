@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" color="light" [routerLink]="['/settings']">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="text-center">Languages Preference</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list>
+    <ion-item>
+      <ion-label>Language 1</ion-label>
+      <ion-select
+        [disabled]="availableLanguages().length < 2"
+        [(ngModel)]="language1"
+        (ngModelChange)="onPreferenceChange()"
+        interface="popover"
+        placeholder="Select"
+      >
+        @for (lang of availableLanguages(); track $index) {
+          <ion-select-option [value]="lang.code">
+            {{ lang.name }}
+          </ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Language 2</ion-label>
+      <ion-select
+        [disabled]="availableLanguages().length < 2"
+        [(ngModel)]="language2"
+        (ngModelChange)="onPreferenceChange()"
+        interface="popover"
+        placeholder="Select"
+      >
+        @for (lang of availableLanguages(); track $index) {
+          <ion-select-option [value]="lang.code">
+            {{ lang.name }}
+          </ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+  </ion-list>
+  @if (availableLanguages().length < 2) {
+    <div class="ion-padding text-danger">
+      <p>*Please download at least two languages to set preferences.</p>
+    </div>
+  }
+</ion-content>

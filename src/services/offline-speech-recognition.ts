@@ -1,8 +1,8 @@
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
 import { Injectable, signal } from '@angular/core';
 import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
 import { DownloadProgress, Language, OfflineSpeechRecognition, RecognitionResult } from 'capacitor-offline-speech-recognition';
-import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,8 @@ export class OfflineSpeechRecognitionService {
   recognitionListener?: { remove: () => void };
   downloadProgress = signal<Record<string, number>>({});
   mlkitDownloading = signal<{ [key: string]: boolean }>({});
+  firstLanguage = signal<{ code: string; name: string } | null>(null);
+  secondLanguage = signal<{ code: string; name: string } | null>(null);
 
   constructor(private router: Router) {}
 
@@ -45,7 +47,7 @@ export class OfflineSpeechRecognitionService {
       console.log('Downloaded models:', models);
       if (!models || models.length === 0) {
         try {
-          await this.router.navigateByUrl('/settings', { replaceUrl: true });
+          await this.router.navigateByUrl('/languages-download', { replaceUrl: true });
         } catch {}
       }
     } catch (error) {
@@ -164,9 +166,65 @@ export class OfflineSpeechRecognitionService {
   async removeAllListeners() {
     try {
       await OfflineSpeechRecognition.removeAllListeners();
-      console.log('All listeners removed.');
     } catch (error) {
       console.error('Error removing listeners:', error);
+    }
+  }
+
+  savePreferences(pref: { first: any; second: any }) {
+    this.firstLanguage.set(pref.first);
+    this.secondLanguage.set(pref.second);
+
+    localStorage.setItem('firstLanguage', JSON.stringify(pref.first));
+    localStorage.setItem('secondLanguage', JSON.stringify(pref.second));
+  }
+
+  availableLanguages() {
+    const downloaded = this.downloadedModels();
+    return this.languages().filter((lang) => downloaded.includes(lang.code));
+  }
+
+  async loadPreferences() {
+    const fetched = this.languages();
+    if (!fetched || fetched.length === 0) return;
+
+    const available = this.availableLanguages();
+    const codes = available.length > 0 ? available.map((l) => l.code) : fetched.map((l) => l.code);
+
+    // Load stored values
+    const storedFirst = JSON.parse(localStorage.getItem('firstLanguage') || 'null');
+    const storedSecond = JSON.parse(localStorage.getItem('secondLanguage') || 'null');
+
+    // If stored preferences exist → load them
+    if (storedFirst?.code && storedSecond?.code) {
+      this.firstLanguage.set(storedFirst);
+      this.secondLanguage.set(storedSecond);
+      return;
+    }
+
+    // Auto-select defaults
+    const first = available.find((l) => l.code === codes[0]);
+    let second = available.find((l) => l.code === codes[1]);
+
+    if (!second) second = first;
+
+    const firstObj = { code: first?.code ?? '', name: first?.name ?? '' };
+    const secondObj = { code: second?.code ?? '', name: second?.name ?? '' };
+
+    // Save individually
+    localStorage.setItem('firstLanguage', JSON.stringify(firstObj));
+    localStorage.setItem('secondLanguage', JSON.stringify(secondObj));
+
+    this.firstLanguage.set(firstObj);
+    this.secondLanguage.set(secondObj);
+  }
+
+  async deleteLanguage(code: string) {
+    try {
+      const languageCode = code === 'en-us' ? 'en' : code;
+      await Translation.deleteDownloadedModel({ language: languageCode as MLKitLanguage });
+    } catch (error) {
+      console.error('Error deleting language', code, error);
     }
   }
 }

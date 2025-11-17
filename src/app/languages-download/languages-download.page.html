@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <!-- Back Button (if not on settings) -->
+    <ion-buttons slot="start">
+      <ion-button fill="clear" color="light" [routerLink]="['/settings']">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <!-- Page Title -->
+    <ion-title class="text-center"> Languages </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-list class="language-list">
+    @for (lang of languages(); track $index) {
+      <ion-item class="list-item-container">
+        <ion-label class="language-label">
+          <h2>{{ lang.name }}</h2>
+        </ion-label>
+
+        <!-- if language model is downloaded -->
+        @if (isDownloaded(lang.code) && !mlkitDownloading()[lang.code]) {
+          <ion-button color="primary" size="small" fill="clear" (click)="confirmDelete(lang)" slot="end">
+            <ion-icon name="trash-outline" />
+          </ion-button>
+        }
+        <!--  Downloading -->
+        @if (isDownloadingMap()[lang.code] || mlkitDownloading()[lang.code] || downloadProgress()[lang.code]) {
+          <div class="download-progress">
+            <ion-spinner name="lines-sharp" class="black-spinner"></ion-spinner>
+            @if (downloadProgress()[lang.code]) {
+              <span class="progress-text"> {{ downloadProgress()[lang.code] | number: '1.0-0' }}% </span>
+            }
+          </div>
+        }
+
+        <!--  Not Downloaded -->
+        @if (!isDownloaded(lang.code) && !isDownloadingMap()[lang.code] && !mlkitDownloading()[lang.code]) {
+          <ion-button color="primary" size="small" fill="clear" (click)="downloadModel(lang)" [disabled]="anyDownloading()" slot="end">
+            <ion-icon name="cloud-download-outline"></ion-icon>
+          </ion-button>
+        }
+      </ion-item>
+    }
+  </ion-list>
+</ion-content>

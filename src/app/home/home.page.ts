@@ -19,6 +19,7 @@ import { Language } from 'capacitor-offline-speech-recognition';
 import { TextToSpeechService } from 'src/services/text-to-speech';
 import { Component, computed, effect, signal } from '@angular/core';
 import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
+import { TranslationHistoryService } from 'src/services/translation-history-service';
 import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-recognition';
 
 @Component({
@@ -82,7 +83,8 @@ export class HomePage {
 
   constructor(
     private ttsService: TextToSpeechService,
-    private osrService: OfflineSpeechRecognitionService
+    private historyService: TranslationHistoryService,
+    private osrService: OfflineSpeechRecognitionService,
   ) {
     this.topTextSubject
       .pipe(
@@ -123,7 +125,17 @@ export class HomePage {
           this.inputTextTop.set('');
         }
       });
+    effect(() => {
+      const first = this.osrService.firstLanguage();
+      const second = this.osrService.secondLanguage();
 
+      if (first?.code) {
+        this.selectedBottomLanguage.set(first.code);
+      }
+      if (second?.code) {
+        this.selectedTopLanguage.set(second.code);
+      }
+    });
     effect(() => {
       const topLang = this.selectedTopLanguage();
       const bottomLang = this.selectedBottomLanguage();
@@ -157,7 +169,7 @@ export class HomePage {
       const bottomCode = this.normalizeLangCode(bottomLang);
 
       const [t1, t2] = await Promise.all([this.translateText(rawTopToBottom, topCode), this.translateText(rawBottomToTop, bottomCode)]);
-      
+
       this.titleTopToBottom.set(t1);
       this.titleBottomToTop.set(t2);
     } catch (err) {
@@ -170,7 +182,7 @@ export class HomePage {
   async translateText(text: string, targetLang: string): Promise<string> {
     try {
       const normalizedTarget = this.normalizeLangCode(targetLang);
-      
+
       const result = await Translation.translate({
         text,
         sourceLanguage: 'en' as MLKitLanguage,
@@ -187,19 +199,11 @@ export class HomePage {
     try {
       await this.osrService.getSupportedLanguages();
       await this.osrService.getDownloadedLanguageModels();
+      await this.osrService.loadPreferences();
       const fetched = this.osrService.languages();
+
       if (fetched && fetched.length > 0) {
         this.languages.set(fetched);
-
-        const available = this.availableLanguages();
-        const codes = available.length > 0 ? available.map((l) => l.code) : fetched.map((l) => l.code);
-        if (!codes.includes(this.selectedTopLanguage())) {
-          this.selectedTopLanguage.set(codes[0]);
-        }
-        if (!codes.includes(this.selectedBottomLanguage())) {
-          const second = codes.length > 1 ? codes[1] : codes[0];
-          this.selectedBottomLanguage.set(second);
-        }
       }
     } catch (err) {
       console.error('Error loading languages', err);
@@ -221,14 +225,25 @@ export class HomePage {
       const source = this.normalizeLangCode(side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage());
       const target = this.normalizeLangCode(side === 'top' ? this.selectedBottomLanguage() : this.selectedTopLanguage());
 
-      // Perform translation
       const result = await Translation.translate({
         text,
         sourceLanguage: source as MLKitLanguage,
         targetLanguage: target as MLKitLanguage
       });
 
-      // Return the translated text
+      // Convert code → full language names
+      const sourceName = this.getLanguageName(source);
+      const targetName = this.getLanguageName(target);
+
+      this.historyService.addOrUpdateHistory({
+        id: crypto.randomUUID(),
+        fromText: text,
+        toText: result.text,
+        fromLang: sourceName,
+        toLang: targetName,
+        timestamp: Date.now()
+      });
+
       return result.text;
     } catch (error) {
       console.error('Translation error:', error);

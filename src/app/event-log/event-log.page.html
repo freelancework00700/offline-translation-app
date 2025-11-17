@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <!-- Back Button -->
+    <ion-buttons slot="start">
+      <ion-button fill="clear" color="light" [routerLink]="['/settings']">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="text-center">Event Log</ion-title>
+
+    <!-- Show Clear All Button ONLY when history is not empty -->
+    @if (historyService.history().length > 0) {
+      <ion-buttons slot="end">
+        <ion-button color="light" fill="clear" (click)="clearAll()">
+          <ion-icon name="trash-bin-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- No History -->
+  @if (historyService.history().length === 0) {
+    <div class="no-history">No history found.</div>
+  }
+
+  <!-- History List -->
+  @else {
+    <ion-list>
+      @for (item of historyService.history(); track $index) {
+        <ion-item>
+          <ion-label>
+            <h3>{{ item.fromText }}</h3>
+            <p>{{ item.toText }}</p>
+            <small>{{ item.fromLang }} → {{ item.toLang }}</small
+            ><br />
+            <small>{{ item.timestamp | date: 'short' }}</small>
+          </ion-label>
+
+          <!-- Buttons Section -->
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="primary" (click)="copyText(item.fromText)">
+              <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button fill="clear" color="danger" (click)="deleteItem(item.id)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>
