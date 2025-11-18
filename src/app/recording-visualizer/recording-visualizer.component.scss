@@ -1,0 +1,54 @@
+.google-mic-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.google-mic-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+/* Outer pulsing red ring */
+.google-mic-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 6px solid var(--ion-color-primary);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  animation: pulseRing 1.5s infinite ease-in-out;
+}
+
+/* Icon inside */
+.stop-icon {
+  font-size: 48px;
+  color: var(--ion-color-primary);
+}
+
+/* Pulse animation */
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    border-width: 6px;
+    box-shadow: 0 0 4px rgba(255, 85, 85, 0.5);
+  }
+  50% {
+    transform: scale(1.08);
+    border-width: 8px;
+    box-shadow: 0 0 12px rgba(255, 85, 85, 1);
+  }
+  100% {
+    transform: scale(1);
+    border-width: 6px;
+    box-shadow: 0 0 4px rgba(255, 85, 85, 0.5);
+  }
+}
+

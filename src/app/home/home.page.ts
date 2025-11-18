@@ -11,6 +11,7 @@ import {
   IonCardTitle,
   IonCardHeader,
   IonCardContent,
+  ModalController,
   IonSelectOption
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +22,7 @@ import { Component, computed, effect, signal } from '@angular/core';
 import { Translation, Language as MLKitLanguage } from '@capacitor-mlkit/translation';
 import { TranslationHistoryService } from 'src/services/translation-history-service';
 import { OfflineSpeechRecognitionService } from 'src/services/offline-speech-recognition';
-
+import { RecordingVisualizerComponent } from '../recording-visualizer/recording-visualizer.component';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -82,6 +83,7 @@ export class HomePage {
   bottomTextSubject = new Subject<string>();
 
   constructor(
+    private modalCtrl: ModalController,
     private ttsService: TextToSpeechService,
     private historyService: TranslationHistoryService,
     private osrService: OfflineSpeechRecognitionService,
@@ -267,6 +269,17 @@ export class HomePage {
 
   async startRecord(side: 'top' | 'bottom') {
     await this.onRecord(side);
+    const modal = await this.modalCtrl.create({
+      component: RecordingVisualizerComponent,
+      cssClass: 'custom-center-modal',
+      backdropDismiss: false
+      
+    });
+
+    await modal.present();
+
+    await modal.onDidDismiss();
+    this.stopRecord();
   }
 
   async stopRecord() {

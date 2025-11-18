@@ -62,3 +62,9 @@ ion-card.translation-card {
   align-items: center;
   gap: var(--space-8);
 }
+
+.custom-center-modal{
+  --height: 300px;
+  --width: 300px;
+  --border-radius: 12px;
+}
