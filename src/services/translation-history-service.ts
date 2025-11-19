@@ -46,7 +46,7 @@ export class TranslationHistoryService {
   }
 
   addOrUpdateHistory(entry: TranslationHistoryItem) {
-    const history = [...this.history()]; // clone
+    const history = [...this.history()];
 
     if (history.length === 0) {
       this.saveHistory([entry]);
@@ -58,14 +58,12 @@ export class TranslationHistoryService {
 
     const isSameText = oldText === newText;
     const isTypingContinuation = newText.startsWith(oldText);
-    const isRecent = entry.timestamp - last.timestamp < 3000;
 
-    if ((isSameText || isTypingContinuation) && isRecent) {
+    if (isSameText || isTypingContinuation) {
       history[0] = entry;
     } else {
       history.unshift(entry);
     }
-
     this.saveHistory(history);
   }
 }

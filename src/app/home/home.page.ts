@@ -86,7 +86,7 @@ export class HomePage {
     private modalCtrl: ModalController,
     private ttsService: TextToSpeechService,
     private historyService: TranslationHistoryService,
-    private osrService: OfflineSpeechRecognitionService,
+    private osrService: OfflineSpeechRecognitionService
   ) {
     this.topTextSubject
       .pipe(
@@ -95,7 +95,8 @@ export class HomePage {
           if (!text.trim()) {
             return of('');
           }
-          return this.translate(text, 'top');
+          const isSTT = this.isRecording();
+          return this.translate(text, 'top', !isSTT);
         })
       )
       .subscribe({
@@ -115,7 +116,8 @@ export class HomePage {
           if (!text.trim()) {
             return of('');
           }
-          return this.translate(text, 'bottom');
+          const isSTT = this.isRecording();
+          return this.translate(text, 'bottom', !isSTT);
         })
       )
       .subscribe({
@@ -222,7 +224,7 @@ export class HomePage {
     }
   }
 
-  async translate(text: string, side: 'top' | 'bottom') {
+  async translate(text: string, side: 'top' | 'bottom', saveHistory = true) {
     try {
       const source = this.normalizeLangCode(side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage());
       const target = this.normalizeLangCode(side === 'top' ? this.selectedBottomLanguage() : this.selectedTopLanguage());
@@ -233,18 +235,19 @@ export class HomePage {
         targetLanguage: target as MLKitLanguage
       });
 
-      // Convert code → full language names
-      const sourceName = this.getLanguageName(source);
-      const targetName = this.getLanguageName(target);
+      if (saveHistory) {
+        const sourceName = this.getLanguageName(source);
+        const targetName = this.getLanguageName(target);
 
-      this.historyService.addOrUpdateHistory({
-        id: crypto.randomUUID(),
-        fromText: text,
-        toText: result.text,
-        fromLang: sourceName,
-        toLang: targetName,
-        timestamp: Date.now()
-      });
+        this.historyService.addOrUpdateHistory({
+          id: crypto.randomUUID(),
+          fromText: text,
+          toText: result.text,
+          fromLang: sourceName,
+          toLang: targetName,
+          timestamp: Date.now()
+        });
+      }
 
       return result.text;
     } catch (error) {
@@ -252,7 +255,6 @@ export class HomePage {
       throw new Error('An error occurred while translating. Please try again later.');
     }
   }
-
   onMicClick(side: 'top' | 'bottom') {
     const text = side === 'top' ? this.inputTextTop() : this.inputTextBottom();
     const lang = side === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage();
@@ -273,7 +275,6 @@ export class HomePage {
       component: RecordingVisualizerComponent,
       cssClass: 'custom-center-modal',
       backdropDismiss: false
-      
     });
 
     await modal.present();
@@ -284,8 +285,29 @@ export class HomePage {
 
   async stopRecord() {
     if (this.osrService.isRecognizing()) {
+      const finalText = this.osrService.recognizedText();
+      const activeSide = this.activeRecordingSide();
+
       await this.osrService.stopRecognition();
       this.activeRecordingSide.set(null);
+
+      if (finalText.trim() && activeSide) {
+        const sourceText = activeSide === 'top' ? this.inputTextTop() : this.inputTextBottom();
+        const translatedText = activeSide === 'top' ? this.inputTextBottom() : this.inputTextTop();
+        const sourceLang = this.getLanguageName(activeSide === 'top' ? this.selectedTopLanguage() : this.selectedBottomLanguage());
+        const targetLang = this.getLanguageName(activeSide === 'top' ? this.selectedBottomLanguage() : this.selectedTopLanguage());
+
+        if (sourceText.trim() && translatedText.trim()) {
+          this.historyService.addOrUpdateHistory({
+            id: crypto.randomUUID(),
+            fromText: sourceText,
+            toText: translatedText,
+            fromLang: sourceLang,
+            toLang: targetLang,
+            timestamp: Date.now()
+          });
+        }
+      }
     }
   }
 
